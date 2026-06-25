@@ -1,219 +1,273 @@
-# AEGLE CUSTOM PLATFORM - BUILD PATH
+# Aegle Custom Platform - Production Build Plan
 
-## Plan Review
+## Current State
 
-The master development plan is directionally strong, but it is too broad to build phase-by-phase as written. Several later features depend on decisions that must be made much earlier, especially product data modeling, pricing, artwork storage, order lifecycle, and permissions.
+This repository is a working Next.js prototype for a custom apparel and promotional products platform. It already includes:
 
-The biggest risk areas are:
+- Public storefront routes
+- Product catalog
+- Product detail/configuration flow
+- Browser design studio
+- Cart and mock checkout
+- Group orders page
+- Admin dashboard
+- Admin product editor
+- Admin order editor
+- Admin content editor
+- Local JSON-backed APIs
+- Initial Prisma schema
+- Stripe dependency and integration stubs
 
-- Design Studio complexity: Fabric.js is good for canvas editing, but print-ready output, proof generation, SVG/PDF handling, font licensing, and production file export need early architecture.
-- Product pricing: Custom apparel pricing is not simple ecommerce pricing. The platform needs quantity breaks, decoration methods, locations, setup fees, rush fees, store-specific pricing, fundraiser margins, and corporate budgets.
-- Stores and group ordering: Corporate stores, team stores, and fundraising stores should share one flexible Storefront model with different modes.
-- Admin backend scope: "Fully editable admin" can balloon. Start with operational admin: products, orders, users, storefronts, designs, and production.
-- Shipping integrations: UPS, FedEx, and USPS should likely be abstracted behind one shipping provider layer, possibly using EasyPost, Shippo, or ShipStation instead of direct carrier integrations.
-- AI features: These should be deferred until the core platform has real design and order data.
+The next build phase is not a greenfield build. It is a conversion from a file-backed prototype into a production platform.
 
-## Recommended Build Path
+## Product Direction
 
-### Stage 0: Product Definition
+The platform should be treated as a custom commerce and production workflow system, not a standard ecommerce storefront.
 
-Before writing much code, define the operational rules.
+Core business capabilities:
 
-Deliverables:
+- Product customization
+- Customer design submission
+- Online design studio
+- Cart and checkout
+- Quote requests
+- Group ordering
+- Corporate storefronts
+- Fundraising storefronts
+- Customer accounts
+- Staff/admin accounts
+- Artwork approval
+- Production workflow
+- Stripe payments
+- Shipping and tracking
+- Reporting
 
-- Product types: apparel, promo products, digital proof-only, quote-only
-- Decoration methods: screen print, embroidery, DTG, DTF, sublimation, engraving, etc.
-- Pricing rules: base price, quantity tiers, decoration cost, setup fees, margins
-- Order types: normal checkout, quote request, group order, corporate store order, fundraiser order
-- User roles and permission matrix
-- Production workflow states
-- Design file requirements for production
+## Architecture Principles
 
-This prevents rebuilding the database later.
+- Keep customer-facing commerce, design, and production workflow connected through shared order data.
+- Keep pricing logic in a dedicated pricing service/module, not scattered through UI components.
+- Use one flexible `Storefront` model for corporate stores, fundraiser stores, team stores, and private campaigns.
+- Store design source data separately from production-ready proof/export files.
+- Use Stripe-hosted or Stripe Payment Element flows so the app never handles raw card data.
+- Use signed URLs for uploaded artwork and production files.
+- Treat admin actions as auditable production operations.
 
-### Stage 1: Technical Foundation
+## Immediate Priorities
 
-Build the app shell and deployment foundation.
+### 1. Stabilize The Repository
 
-Core stack:
+Goal: make the current app reproducible and safe to deploy.
 
-- Next.js App Router
-- TypeScript
-- Tailwind CSS
-- Prisma
-- PostgreSQL
-- NextAuth/Auth.js
-- Stripe
-- S3-compatible storage
-- Resend
-- Sentry
-- PostHog
-- Vercel
+Tasks:
 
-Deliverables:
+- Generate a project-local `package-lock.json`.
+- Confirm `npm install` completes cleanly.
+- Run `npm run typecheck`.
+- Run `npm run build`.
+- Fix all TypeScript and production build failures.
+- Add a real lint command if `next lint` is not supported by the installed Next.js version.
+- Add CI for install, typecheck, and build.
+- Confirm `.env.example` has every required environment variable and no real secrets.
 
-- Production build passes
-- CI checks TypeScript, linting, formatting, tests
-- Environment validation
-- Database migrations
-- Seed data
-- Basic layout system
-- Admin route shell
-- Customer route shell
+Definition of done:
 
-### Stage 2: Core Data Model
+- A fresh clone can install dependencies and build without manual fixes.
 
-Build the database around real business objects.
+### 2. Environment And Deployment Setup
 
-Primary models:
+Goal: prepare the app for Vercel deployment.
 
-- User
-- Role
-- Permission
-- CustomerProfile
-- StaffProfile
-- Product
-- ProductVariant
-- ProductColor
-- ProductSize
-- Category
-- DecorationMethod
-- PricingRule
-- Design
-- DesignAsset
-- Cart
-- CartItem
-- Order
-- OrderItem
-- Payment
-- Shipment
-- Storefront
-- StorefrontProduct
-- ProductionJob
-- AuditLog
+Tasks:
 
-Important recommendation: use one flexible Storefront model with a type field:
+- Define required env vars in `.env.example`.
+- Add environment validation with Zod.
+- Create Vercel project.
+- Configure preview and production environments.
+- Add Sentry DSN placeholder.
+- Add PostHog key placeholder.
+- Add Stripe test keys placeholders.
+- Add database URL placeholder.
+- Add storage bucket placeholders.
 
-```ts
-CORPORATE
-FUNDRAISER
-TEAM
-PUBLIC
-PRIVATE
-```
+Definition of done:
 
-This avoids duplicating corporate store, fundraiser store, and team store logic.
+- Vercel can build the app from GitHub using non-production placeholder services or test credentials.
 
-### Stage 3: Authentication And Admin Base
+### 3. Replace JSON Storage With Database Storage
 
-Build the control layer early.
+Goal: move from `data/*.json` to PostgreSQL through Prisma.
 
-Deliverables:
+Current local storage:
 
-- Customer signup/login
-- Staff/admin login
-- Email verification
-- Password reset
-- Role-based route protection
-- Admin dashboard shell
-- User management
-- Permission checks
-- Audit logging foundation
+- `data/products.json`
+- `data/orders.json`
+- `data/content.json`
+- `lib/dataStore.ts`
 
-Avoid overbuilding social login at first unless it is a hard requirement.
+Initial production models:
 
-### Stage 4: Product Catalog And Admin Product Management
+- `User`
+- `Product`
+- `ProductVariant`
+- `Category`
+- `Design`
+- `DesignAsset`
+- `Cart`
+- `CartItem`
+- `Order`
+- `OrderItem`
+- `Payment`
+- `Shipment`
+- `SiteContent`
+- `Storefront`
+- `ProductionJob`
+- `AuditLog`
 
-Build the product engine before checkout or design studio.
+Tasks:
 
-Customer-facing:
+- Expand `prisma/schema.prisma` beyond the current simple models.
+- Add database client helper in `lib/db.ts`.
+- Create migrations.
+- Convert product APIs to Prisma.
+- Convert order APIs to Prisma.
+- Convert content APIs to Prisma.
+- Keep seed data equivalent to current JSON data.
+- Remove write dependency on `data/*.json` after database routes are stable.
 
-- Category browsing
-- Search
-- Filters
-- Product detail page
-- Variant/color/size selection
-- Quantity pricing preview
+Definition of done:
 
-Admin-facing:
+- Products, orders, and content are read/written through PostgreSQL in development and production.
 
-- Create/edit/archive products
-- Manage variants
-- Manage images
-- Manage pricing tiers
-- Assign decoration methods
-- Bulk import/export later, not first
+### 4. Authentication And Permissions
 
-Deliverable:
+Goal: replace open admin access with authenticated staff/admin access.
 
-- A customer can browse products and configure a basic product selection.
+Recommended stack:
 
-### Stage 5: Cart, Pricing, And Checkout MVP
+- Auth.js/NextAuth
+- Prisma adapter
+- Email/password or magic link for staff
+- Optional customer social login later
 
-Build money flow before advanced customization.
+Roles:
 
-Deliverables:
+- Customer
+- Staff
+- Designer
+- Production Manager
+- Admin
+- Super Admin
 
-- Cart
-- Size breakdowns
-- Quantity updates
-- Guest checkout
-- Customer checkout
-- Stripe Checkout or Payment Element
-- Order creation
-- Payment records
-- Basic confirmation emails
-- Admin order view
+Tasks:
 
-Important: the pricing engine should be its own service/module, not scattered across UI components.
+- Add user/session models.
+- Add admin login.
+- Protect `/admin` routes.
+- Protect admin API writes.
+- Add role checks for product, order, content, and production actions.
+- Add audit logging for admin mutations.
+- Add password reset or magic-link login.
 
-### Stage 6: Design Studio MVP
+Definition of done:
 
-Start narrow. Do not attempt every file type and advanced tool immediately.
+- Anonymous users cannot access admin pages or mutate admin APIs.
 
-MVP features:
+### 5. Product And Pricing Engine
 
-- Launch studio from product page
-- Product mockup canvas
-- Upload PNG/JPG/SVG
-- Add text
-- Move/resize/rotate
-- Basic layers
-- Save/load design
-- Attach design to cart item
-- Export preview image
-- Store Fabric.js JSON
-- Store uploaded assets in S3
+Goal: model real custom apparel pricing.
+
+Current product data supports:
+
+- Colors
+- Sizes
+- Print locations
+- Base price
+- Price breaks
+- Tags
+
+Production pricing needs:
+
+- Product variants
+- Decoration methods
+- Print/embroidery locations
+- Quantity tiers
+- Setup fees
+- Rush fees
+- Storefront-specific margins
+- Fundraiser margin allocation
+- Corporate budget rules
+
+Tasks:
+
+- Create a pricing module with typed inputs and outputs.
+- Add unit tests for price breaks and size breakdowns.
+- Add decoration method support.
+- Add pricing preview on product pages.
+- Add admin pricing controls.
+
+Definition of done:
+
+- Cart, checkout, and admin order views all use the same pricing engine.
+
+### 6. Cart And Stripe Checkout
+
+Goal: replace mock checkout with real checkout.
+
+Tasks:
+
+- Persist carts for logged-in users.
+- Keep anonymous cart support.
+- Create Stripe checkout sessions or Payment Element intents.
+- Add Stripe webhook route.
+- Verify webhook signatures.
+- Create orders only from trusted server-side cart/pricing data.
+- Store payment status.
+- Add order confirmation page.
+- Send confirmation email.
+
+Definition of done:
+
+- A customer can complete a Stripe test payment and produce a paid order in the admin queue.
+
+### 7. Design Studio MVP Hardening
+
+Goal: make the current design studio usable for production intake.
+
+MVP file support:
+
+- PNG
+- JPG
+- SVG
 
 Defer:
 
-- PDF/AI/EPS import
-- Curved text
-- Vector conversion
-- Advanced print quality checks
-- Production-grade art normalization
+- AI
+- EPS
+- editable PDF import
+- vector conversion
+- curved text
+- advanced prepress automation
 
-Deliverable:
+Tasks:
 
-- Customer can design a product, save it, and purchase it.
+- Store Fabric JSON in the database.
+- Store preview image separately.
+- Upload artwork assets to S3/R2.
+- Validate upload file type and size.
+- Attach designs to cart items.
+- Attach purchased designs to order items.
+- Add admin artwork review screen.
+- Add proof status fields.
 
-### Stage 7: Order Management And Production Workflow
+Definition of done:
 
-Once orders exist, build the internal workflow.
+- A design can move from product page to cart to order to admin artwork review.
 
-Deliverables:
+### 8. Production Workflow
 
-- Order status history
-- Artwork approval status
-- Proof upload/generation
-- Customer proof approval
-- Production job creation
-- Staff assignment
-- Manufacturing stages
-- Internal notes
-- Customer-facing order status page
+Goal: turn paid orders into trackable production jobs.
 
-Recommended production states:
+Recommended order states:
 
 ```ts
 PENDING_PAYMENT
@@ -230,182 +284,242 @@ CANCELLED
 REFUNDED
 ```
 
-### Stage 8: Storefront System
+Tasks:
 
-Now build corporate, fundraiser, and team stores on top of the core catalog/order system.
+- Add order status history.
+- Add production jobs.
+- Add assigned staff.
+- Add customer proof approval.
+- Add internal notes.
+- Add customer-visible order status.
+- Add production dashboard filters.
 
-Shared features:
+Definition of done:
 
-- Storefront landing page
-- Store-specific product selection
-- Store-specific pricing
+- Staff can move an order from paid to shipped with a complete status trail.
+
+### 9. Storefront Engine
+
+Goal: support corporate, fundraiser, team, private, and public storefronts with one system.
+
+Recommended storefront types:
+
+```ts
+CORPORATE
+FUNDRAISER
+TEAM
+PUBLIC
+PRIVATE
+```
+
+Shared capabilities:
+
 - Store branding
+- Product restrictions
+- Store-specific pricing
 - Open/close dates
 - Access control
-- Reporting
+- Store reporting
 
-Corporate-specific:
+Corporate additions:
 
-- Employee access
-- Budgets
-- Restricted products
-- Optional approval flow
+- Employee ordering
+- Budget controls
+- Optional manager approval
 
-Fundraiser-specific:
+Fundraiser additions:
 
-- Margin/revenue tracking
+- Revenue tracking
 - Donation reporting
-- Public storefronts
+- Payout reporting
 
-Team/group-specific:
+Team/group additions:
 
-- Campaign close date
-- Participant ordering
-- Bulk production summary
-
-### Stage 9: Group Ordering
-
-Build this after storefronts because group ordering is essentially a campaign-based storefront plus aggregation.
-
-Deliverables:
-
-- Create campaign
-- Invite participants
-- Participant checkout
+- Campaign deadlines
 - Size aggregation
-- Campaign deadline
-- Auto-close
-- Admin production summary
-- Optional organizer dashboard
+- Bulk production summaries
 
-### Stage 10: Shipping
+Definition of done:
 
-Recommended approach: use a shipping abstraction.
+- A storefront can be created in admin, assigned products, opened publicly or privately, and tracked separately in reporting.
 
-Options:
+### 10. Shipping
 
-- EasyPost
+Goal: support reliable rates, labels, and tracking without direct carrier complexity at first.
+
+Recommended providers:
+
 - Shippo
+- EasyPost
 - ShipStation
-- Direct UPS/FedEx/USPS only if required
 
-Deliverables:
+Tasks:
 
-- Shipping address validation
-- Live rates
-- Label creation
-- Tracking number storage
-- Tracking emails
-- Shipment status updates
+- Add address validation.
+- Add shipping rate abstraction.
+- Add selected shipping method to checkout.
+- Store tracking numbers.
+- Send shipping emails.
+- Add shipment events.
 
-### Stage 11: CMS And Marketing Admin
+Definition of done:
 
-Add editable content after the commerce engine works.
+- Staff can add shipment details and customers can see tracking status.
 
-Deliverables:
+### 11. CMS And Content Management
 
-- Homepage editor
-- Banner editor
-- FAQ editor
-- Blog editor
-- Storefront content blocks
+Goal: keep marketing content editable without blocking commerce work.
 
-Keep this separate from operational admin.
+Current content:
 
-### Stage 12: Analytics And Reporting
+- `data/content.json`
+- `/admin/content`
+- `/api/content`
 
-Build reporting from actual platform events.
+Tasks:
 
-Deliverables:
+- Move content to Prisma.
+- Add content block types.
+- Add homepage sections.
+- Add banners.
+- Add FAQ entries.
+- Add artwork help content.
 
-- Revenue dashboard
-- Order counts
-- Product performance
+Definition of done:
+
+- Admin can edit key storefront content without changing code.
+
+### 12. Analytics And Reporting
+
+Goal: expose operational and revenue data.
+
+Metrics:
+
+- Revenue
+- Orders
+- Quote requests
+- Conversion rate
+- Top products
 - Storefront performance
-- Fundraiser payouts
+- Fundraiser totals
+- Production queue status
 - Customer lifetime value
-- Production queue metrics
-- Conversion tracking with PostHog
 
-### Stage 13: Security, Compliance, And Operations
+Tasks:
 
-Some security work starts from day one, but this stage hardens the system.
+- Add event tracking.
+- Add PostHog.
+- Add admin reports.
+- Add CSV exports.
 
-Deliverables:
+Definition of done:
 
-- Rate limiting
-- Audit logs
-- Admin action history
-- Sentry alerts
-- Database backups
-- Secure file access
-- Signed S3 URLs
-- Stripe webhook verification
-- Privacy controls
-- Data export/delete workflows
+- Admin can answer what sold, what is pending, what is late, and which storefronts are performing.
 
-PCI note: use Stripe-hosted/payment-element flows so the platform does not directly handle raw card data.
+### 13. Security And Compliance
 
-### Stage 14: AI Features
+Goal: harden the app before live orders.
 
-Only add AI after the core data and workflows are stable.
+Tasks:
 
-Highest-value AI features first:
+- Rate-limit sensitive endpoints.
+- Validate all API inputs with Zod.
+- Verify Stripe webhooks.
+- Use signed upload/download URLs.
+- Add audit logs.
+- Add Sentry monitoring.
+- Add backup plan.
+- Add privacy controls.
+- Add data deletion/export path.
 
-- Print quality warnings
+Definition of done:
+
+- The app is safe enough to process real customer accounts, artwork, and payments.
+
+### 14. AI Features
+
+Defer until the core platform is working with real order/design data.
+
+Potential features:
+
+- Artwork quality checks
 - Background removal
-- Low-resolution detection
+- Low-resolution warnings
+- Product recommendations
 - Quote assistant
-- Product recommendation assistant
+- Vector conversion
 
-Vector conversion and AI artwork cleanup are useful but technically harder and should come later.
+Definition of done:
 
-## Suggested MVP Scope
+- AI features improve existing workflows without becoming required for checkout or production.
+
+## MVP Release Scope
 
 The first production MVP should include:
 
-- Customer accounts
-- Admin login
-- Product catalog
-- Product admin
+- Customer-facing product catalog
+- Product detail configuration
 - Cart
-- Stripe checkout
-- Basic design studio
-- Saved designs
+- Stripe test/live checkout
+- Basic customer order confirmation
+- Admin login
+- Product admin
 - Order admin
-- Production statuses
-- Basic email notifications
-- S3 file storage
+- Basic design studio
+- Saved design data
+- Artwork review status
+- Production status tracking
+- Email notifications
+- S3/R2 artwork storage
+- PostgreSQL database
 - Vercel deployment
 
-Do not include in MVP:
+Explicitly out of MVP:
 
-- Corporate stores
-- Fundraising stores
-- Group ordering
 - AI tools
-- Full CMS
-- Direct carrier integrations
-- PDF/AI/EPS import
+- Direct UPS/FedEx/USPS integrations
+- Advanced PDF/AI/EPS import
+- Full corporate budget system
+- Full fundraiser payout automation
 - Advanced analytics
+- Complex CMS page builder
+
+## Next Sprint
+
+Sprint objective: make the repository buildable, reproducible, and ready for database/auth work.
+
+Tasks:
+
+- Finish dependency installation and commit `package-lock.json`.
+- Run `npm run typecheck`.
+- Run `npm run build`.
+- Fix build and type errors.
+- Add `lib/env.ts` for environment validation.
+- Expand `.env.example`.
+- Add `lib/db.ts`.
+- Expand `prisma/schema.prisma` for MVP entities.
+- Add seed script coverage for products, content, and sample orders.
+- Open a follow-up branch for JSON-to-Prisma conversion.
+
+Exit criteria:
+
+- `main` builds cleanly.
+- GitHub contains a reproducible baseline.
+- The next branch can focus only on persistence and auth.
 
 ## Build Order Summary
 
-1. Define business rules and pricing logic
-2. Build technical foundation
-3. Build database schema
-4. Build auth and permissions
-5. Build product catalog/admin
-6. Build cart and checkout
-7. Build design studio MVP
-8. Build order and production workflow
-9. Build storefront engine
-10. Build corporate/fundraiser/team stores
-11. Build group ordering
-12. Add shipping integrations
-13. Add CMS
-14. Add analytics
-15. Add AI features
-16. Harden security and compliance continuously
-
-The key architectural decision is to treat this as a custom commerce and production workflow platform, not just a Shopify-style storefront. The database, pricing engine, design storage, and production workflow should be designed first, because every later feature depends on them.
+1. Stabilize repository and CI.
+2. Configure environment and deployment.
+3. Replace JSON storage with Prisma/PostgreSQL.
+4. Add authentication and admin permissions.
+5. Build production pricing engine.
+6. Wire cart and Stripe checkout.
+7. Harden design studio storage and artwork review.
+8. Add production workflow.
+9. Add storefront engine.
+10. Add shipping abstraction.
+11. Move CMS content to database.
+12. Add analytics and reporting.
+13. Harden security and compliance.
+14. Add AI features after real workflow data exists.
