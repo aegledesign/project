@@ -1,0 +1,4 @@
+'use client';
+import { useEffect, useState } from 'react';
+import type { SiteContent } from '@/lib/types';
+export default function AdminContent(){ const [c,setC]=useState<SiteContent>({heroTitle:'',heroSubtitle:'',announcement:'',phone:'',email:''}); useEffect(()=>{fetch('/api/content').then(r=>r.json()).then(setC)},[]); async function save(){await fetch('/api/content',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(c)}); alert('Saved content')} return <main className="mx-auto max-w-4xl px-6 py-12"><h1 className="text-5xl font-black">Site content</h1><div className="card mt-8 space-y-4 p-6">{(Object.keys(c) as (keyof SiteContent)[]).map(k=><div key={k}><label className="label">{k}</label><textarea className="input mt-1" value={c[k]} onChange={e=>setC({...c,[k]:e.target.value})}/></div>)}<button className="btn-primary" onClick={save}>Save content</button></div></main> }

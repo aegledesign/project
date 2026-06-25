@@ -1,0 +1,206 @@
+[
+  {
+    "id": "p1",
+    "slug": "classic-tee",
+    "name": "Classic Cotton Tee",
+    "category": "T-Shirts",
+    "description": "Soft everyday cotton tee for events, schools, teams, and business campaigns.",
+    "hero": "/product-tee.svg",
+    "colors": [
+      "White",
+      "Black",
+      "Navy",
+      "Heather Gray",
+      "Forest"
+    ],
+    "sizes": [
+      "YS",
+      "YM",
+      "YL",
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL",
+      "3XL"
+    ],
+    "printLocations": [
+      "Front",
+      "Back",
+      "Left Chest",
+      "Sleeve"
+    ],
+    "basePrice": 18,
+    "priceBreaks": [
+      {
+        "min": 12,
+        "unitPrice": 18
+      },
+      {
+        "min": 24,
+        "unitPrice": 15
+      },
+      {
+        "min": 48,
+        "unitPrice": 12.5
+      },
+      {
+        "min": 100,
+        "unitPrice": 10.75
+      }
+    ],
+    "sku": "AEG-TEE-001",
+    "active": true,
+    "tags": [
+      "Best Seller",
+      "Screen Print"
+    ]
+  },
+  {
+    "id": "p2",
+    "slug": "performance-polo",
+    "name": "Performance Polo",
+    "category": "Polos",
+    "description": "Moisture-wicking polo for uniforms, golf outings, and staff apparel.",
+    "hero": "/product-polo.svg",
+    "colors": [
+      "White",
+      "Black",
+      "Navy",
+      "Royal",
+      "Red"
+    ],
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL",
+      "3XL"
+    ],
+    "printLocations": [
+      "Left Chest",
+      "Right Chest",
+      "Sleeve",
+      "Back Yoke"
+    ],
+    "basePrice": 34,
+    "priceBreaks": [
+      {
+        "min": 6,
+        "unitPrice": 34
+      },
+      {
+        "min": 12,
+        "unitPrice": 30
+      },
+      {
+        "min": 24,
+        "unitPrice": 27
+      },
+      {
+        "min": 48,
+        "unitPrice": 24
+      }
+    ],
+    "sku": "AEG-POLO-010",
+    "active": true,
+    "tags": [
+      "Embroidery",
+      "Uniform"
+    ]
+  },
+  {
+    "id": "p3",
+    "slug": "canvas-tote",
+    "name": "Heavy Canvas Tote",
+    "category": "Bags",
+    "description": "Durable canvas tote for retail, trade shows, gifts, and corporate giveaways.",
+    "hero": "/product-tote.svg",
+    "colors": [
+      "Natural",
+      "Black",
+      "Navy",
+      "Red"
+    ],
+    "sizes": [
+      "One Size"
+    ],
+    "printLocations": [
+      "Front",
+      "Back"
+    ],
+    "basePrice": 16,
+    "priceBreaks": [
+      {
+        "min": 25,
+        "unitPrice": 16
+      },
+      {
+        "min": 50,
+        "unitPrice": 13.5
+      },
+      {
+        "min": 100,
+        "unitPrice": 11.25
+      },
+      {
+        "min": 250,
+        "unitPrice": 9.75
+      }
+    ],
+    "sku": "AEG-BAG-020",
+    "active": true,
+    "tags": [
+      "Promo",
+      "Retail"
+    ]
+  },
+  {
+    "id": "p4",
+    "slug": "embroidered-cap",
+    "name": "Embroidered Cap",
+    "category": "Hats",
+    "description": "Structured cap with embroidery-ready front panel and adjustable closure.",
+    "hero": "/product-cap.svg",
+    "colors": [
+      "Black",
+      "Navy",
+      "Khaki",
+      "White",
+      "Forest"
+    ],
+    "sizes": [
+      "Adjustable"
+    ],
+    "printLocations": [
+      "Front",
+      "Side",
+      "Back"
+    ],
+    "basePrice": 22,
+    "priceBreaks": [
+      {
+        "min": 12,
+        "unitPrice": 22
+      },
+      {
+        "min": 24,
+        "unitPrice": 19
+      },
+      {
+        "min": 48,
+        "unitPrice": 17
+      },
+      {
+        "min": 96,
+        "unitPrice": 15
+      }
+    ],
+    "sku": "AEG-HAT-030",
+    "active": true,
+    "tags": [
+      "Embroidery"
+    ]
+  }
+]

@@ -1,0 +1,4 @@
+import Link from 'next/link';
+import Image from 'next/image';
+import type { Product } from '@/lib/types';
+export function ProductCard({product}:{product:Product}){ return <Link href={`/products/${product.slug}`} className="card block overflow-hidden transition hover:-translate-y-1"><div className="bg-cream p-8"><Image src={product.hero} alt="" width={420} height={300} className="mx-auto h-48 w-full object-contain"/></div><div className="p-6"><div className="text-xs font-bold uppercase tracking-wider text-ocean">{product.category}</div><h3 className="mt-2 text-xl font-black">{product.name}</h3><p className="mt-2 min-h-12 text-sm text-slate-600">{product.description}</p><div className="mt-4 flex flex-wrap gap-2">{product.tags.map(t=><span key={t} className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold">{t}</span>)}</div><div className="mt-5 font-bold">From ${product.basePrice.toFixed(2)}</div></div></Link> }

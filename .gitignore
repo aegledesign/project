@@ -1,0 +1,34 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+out/
+
+# production
+build/
+dist/
+
+# env files
+.env
+.env.local
+.env.*.local
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# local caches
+.turbo/
+.vercel/
+
+# prisma/local db artifacts
+*.db
+*.db-journal
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/

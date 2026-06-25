@@ -1,0 +1,7 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+model Product { id String @id @default(cuid()) slug String @unique name String category String description String hero String sku String active Boolean @default(true) basePrice Float colors String[] sizes String[] printLocations String[] tags String[] priceBreaks Json createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
+model Order { id String @id @default(cuid()) customerName String email String status String total Float notes String? proofStatus String? items Json createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
+model SiteContent { id String @id @default(cuid()) key String @unique value String updatedAt DateTime @updatedAt }
+model Design { id String @id @default(cuid()) productSlug String customerEmail String? designJson Json previewUrl String? createdAt DateTime @default(now()) }
+model GroupOrder { id String @id @default(cuid()) name String closeDate DateTime? status String @default("Open") instructions String? createdAt DateTime @default(now()) }
