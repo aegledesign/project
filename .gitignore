@@ -23,6 +23,7 @@ pnpm-debug.log*
 # local caches
 .turbo/
 .vercel/
+*.tsbuildinfo
 
 # prisma/local db artifacts
 *.db

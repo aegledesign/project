@@ -1,0 +1,188 @@
+{
+  "pages": [
+    {
+      "id": "page-home",
+      "slug": "home",
+      "title": "Home",
+      "active": true,
+      "sections": [
+        {
+          "id": "home-hero",
+          "type": "HERO",
+          "displayOrder": 0,
+          "active": true,
+          "content": {
+            "type": "HERO",
+            "headline": "Custom apparel and branded goods, built for your team.",
+            "subheading": "Choose a product, place your artwork, approve the proof, and track production.",
+            "imageUrl": "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=1800&q=85",
+            "imageAlt": "Rack of customizable apparel",
+            "primaryLabel": "Browse products",
+            "primaryHref": "/catalog"
+          }
+        },
+        {
+          "id": "home-categories",
+          "type": "CATEGORY_GRID",
+          "displayOrder": 1,
+          "active": true,
+          "content": {
+            "type": "CATEGORY_GRID",
+            "heading": "Shop by category",
+            "categories": [
+              {
+                "name": "T-Shirts",
+                "imageUrl": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1200&q=85",
+                "href": "/catalog"
+              },
+              {
+                "name": "Bags",
+                "imageUrl": "https://images.unsplash.com/photo-1597484662317-9bd7bdda2907?auto=format&fit=crop&w=1200&q=85",
+                "href": "/catalog"
+              },
+              {
+                "name": "Hats",
+                "imageUrl": "https://images.unsplash.com/photo-1521369909029-2afed882baee?auto=format&fit=crop&w=1200&q=85",
+                "href": "/catalog"
+              }
+            ]
+          }
+        },
+        {
+          "id": "home-featured",
+          "type": "FEATURED_PRODUCTS",
+          "displayOrder": 2,
+          "active": true,
+          "content": {
+            "type": "FEATURED_PRODUCTS",
+            "heading": "Popular products",
+            "productIds": [
+              "p1",
+              "p2",
+              "p3",
+              "p4"
+            ]
+          }
+        },
+        {
+          "id": "home-promo",
+          "type": "PROMO_BANNER",
+          "displayOrder": 3,
+          "active": true,
+          "content": {
+            "type": "PROMO_BANNER",
+            "headline": "Free digital proof with every order",
+            "body": "Review placement, scale, and color before production begins.",
+            "href": "/artwork-help",
+            "linkLabel": "Artwork services"
+          }
+        },
+        {
+          "id": "home-testimonials",
+          "type": "TESTIMONIALS",
+          "displayOrder": 4,
+          "active": true,
+          "content": {
+            "type": "TESTIMONIALS",
+            "heading": "Trusted by teams",
+            "items": [
+              {
+                "quote": "The online proof made our event order straightforward.",
+                "name": "Morgan Lee",
+                "organization": "Northside Athletics"
+              },
+              {
+                "quote": "Every department received the right sizes on schedule.",
+                "name": "Chris James",
+                "organization": "Summit Health"
+              }
+            ]
+          }
+        },
+        {
+          "id": "home-faq",
+          "type": "FAQ",
+          "displayOrder": 5,
+          "active": true,
+          "content": {
+            "type": "FAQ",
+            "heading": "Common questions",
+            "items": [
+              {
+                "question": "Can I upload my own logo?",
+                "answer": "Yes. Upload PNG, JPG, WebP, or SVG artwork in the design studio."
+              },
+              {
+                "question": "Will I see a proof?",
+                "answer": "Yes. Production starts only after your proof is approved."
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "navigation": [
+    {
+      "id": "nav-catalog",
+      "label": "Catalog",
+      "href": "/catalog",
+      "location": "HEADER",
+      "group": "",
+      "displayOrder": 0,
+      "active": true
+    },
+    {
+      "id": "nav-groups",
+      "label": "Group Orders",
+      "href": "/group-orders",
+      "location": "HEADER",
+      "group": "",
+      "displayOrder": 1,
+      "active": true
+    },
+    {
+      "id": "nav-artwork",
+      "label": "Artwork Help",
+      "href": "/artwork-help",
+      "location": "HEADER",
+      "group": "",
+      "displayOrder": 2,
+      "active": true
+    },
+    {
+      "id": "footer-products",
+      "label": "Products",
+      "href": "/catalog",
+      "location": "FOOTER",
+      "group": "Shop",
+      "displayOrder": 0,
+      "active": true
+    },
+    {
+      "id": "footer-quote",
+      "label": "Request a quote",
+      "href": "/checkout",
+      "location": "FOOTER",
+      "group": "Services",
+      "displayOrder": 1,
+      "active": true
+    },
+    {
+      "id": "footer-groups",
+      "label": "Group ordering",
+      "href": "/group-orders",
+      "location": "FOOTER",
+      "group": "Services",
+      "displayOrder": 2,
+      "active": true
+    }
+  ],
+  "theme": {
+    "brandName": "Aegle Custom",
+    "primaryColor": "#111827",
+    "accentColor": "#0f766e",
+    "backgroundColor": "#fffaf5",
+    "footerText": "Custom apparel and promotional products with online proofs and production tracking."
+  }
+}

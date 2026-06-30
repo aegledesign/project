@@ -1,0 +1,52 @@
+[
+  {
+    "id": "media-tee",
+    "url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1200&q=85",
+    "key": "seed/tee.jpg",
+    "fileName": "tee.jpg",
+    "mimeType": "image/jpeg",
+    "size": 0,
+    "altText": "tee product photography",
+    "createdAt": "2026-06-30T15:25:57.630Z"
+  },
+  {
+    "id": "media-polo",
+    "url": "https://images.unsplash.com/photo-1625910513413-5fc45e982d8d?auto=format&fit=crop&w=1200&q=85",
+    "key": "seed/polo.jpg",
+    "fileName": "polo.jpg",
+    "mimeType": "image/jpeg",
+    "size": 0,
+    "altText": "polo product photography",
+    "createdAt": "2026-06-30T15:25:57.631Z"
+  },
+  {
+    "id": "media-tote",
+    "url": "https://images.unsplash.com/photo-1597484662317-9bd7bdda2907?auto=format&fit=crop&w=1200&q=85",
+    "key": "seed/tote.jpg",
+    "fileName": "tote.jpg",
+    "mimeType": "image/jpeg",
+    "size": 0,
+    "altText": "tote product photography",
+    "createdAt": "2026-06-30T15:25:57.631Z"
+  },
+  {
+    "id": "media-cap",
+    "url": "https://images.unsplash.com/photo-1521369909029-2afed882baee?auto=format&fit=crop&w=1200&q=85",
+    "key": "seed/cap.jpg",
+    "fileName": "cap.jpg",
+    "mimeType": "image/jpeg",
+    "size": 0,
+    "altText": "cap product photography",
+    "createdAt": "2026-06-30T15:25:57.631Z"
+  },
+  {
+    "id": "media-hero",
+    "url": "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=1800&q=85",
+    "key": "seed/hero.jpg",
+    "fileName": "hero.jpg",
+    "mimeType": "image/jpeg",
+    "size": 0,
+    "altText": "hero product photography",
+    "createdAt": "2026-06-30T15:25:57.631Z"
+  }
+]

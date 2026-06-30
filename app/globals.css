@@ -2,10 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 :root { color-scheme: light; }
-body { background: #fffaf5; color: #111827; }
+body { background: var(--site-background, #fffaf5); color: #111827; }
 * { box-sizing: border-box; }
 .focus-ring { @apply focus:outline-none focus:ring-2 focus:ring-ocean focus:ring-offset-2; }
-.btn-primary { @apply rounded-full bg-ink px-5 py-3 text-sm font-semibold text-white hover:bg-black focus-ring; }
+.btn-primary { @apply rounded-full px-5 py-3 text-sm font-semibold text-white focus-ring; background: var(--primary, #111827); }
 .btn-secondary { @apply rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus-ring; }
 .card { @apply rounded-3xl border border-slate-200 bg-white shadow-soft; }
 .input { @apply w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm focus-ring; }
