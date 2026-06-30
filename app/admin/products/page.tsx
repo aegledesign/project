@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ImageIcon, Pencil, Trash2 } from 'lucide-react';
+import { ImageIcon, Pencil, Trash2, Upload } from 'lucide-react';
+import { getDefaultMockup } from '@/lib/productMedia';
 import type { Product } from '@/lib/types';
 
 function blankProduct(): Product {
@@ -83,6 +84,23 @@ export default function AdminProducts() {
     await load();
   }
 
+  async function changeProductImage(product: Product, file: File) {
+    setError('');
+    const form = new FormData();
+    form.append('file', file);
+    form.append('altText', `${product.name} product image`);
+    const response = await fetch(`/api/admin/products/${product.id}/primary-image`, {
+      method: 'POST',
+      body: form,
+    });
+    const body = await response.json();
+    if (!response.ok) {
+      setError(body.error ?? 'Unable to replace product image');
+      return;
+    }
+    await load();
+  }
+
   return (
     <main className="mx-auto max-w-7xl px-6 py-12">
       <div className="flex items-center justify-between">
@@ -101,6 +119,17 @@ export default function AdminProducts() {
         <div className="mt-8 space-y-3">
           {products.map((product) => (
             <div key={product.id} className="card flex flex-col gap-4 p-5 sm:flex-row sm:items-center">
+              {getDefaultMockup(product) ? (
+                <img
+                  src={getDefaultMockup(product)?.imageUrl}
+                  alt=""
+                  className="h-24 w-24 border border-slate-200 bg-slate-100 object-contain"
+                />
+              ) : (
+                <div className="flex h-24 w-24 items-center justify-center border border-dashed border-slate-300 text-slate-400">
+                  <ImageIcon size={24} />
+                </div>
+              )}
               <div className="min-w-0 flex-1">
                 <h2 className="text-xl font-black">{product.name}</h2>
                 <p className="text-sm text-slate-600">
@@ -108,6 +137,19 @@ export default function AdminProducts() {
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
+                <label className="btn-secondary flex cursor-pointer items-center gap-2">
+                  <Upload size={16} /> Change picture
+                  <input
+                    className="hidden"
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (file) void changeProductImage(product, file);
+                      event.target.value = '';
+                    }}
+                  />
+                </label>
                 <Link className="btn-primary flex items-center gap-2" href={`/admin/products/${product.id}/mockups`}>
                   <ImageIcon size={16} /> Mockups
                 </Link>
