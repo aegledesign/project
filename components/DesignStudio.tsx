@@ -4,10 +4,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlignCenterHorizontal,
   AlignCenterVertical,
+  BrainCircuit,
   Copy,
   Download,
   ImagePlus,
   Layers3,
+  LoaderCircle,
   Save,
   ScanSearch,
   Sparkles,
@@ -26,6 +28,13 @@ type AssistantReport = {
   score: number;
   title: string;
   findings: string[];
+};
+type AiArtworkReview = {
+  score: number;
+  summary: string;
+  printRisks: string[];
+  designSuggestions: string[];
+  productionRecommendation: 'READY' | 'REVIEW' | 'REVISE';
 };
 
 const CANVAS_SIZE = 600;
@@ -79,6 +88,8 @@ export function DesignStudio({ product }: { product: Product }) {
   const [preview, setPreview] = useState<string>();
   const [status, setStatus] = useState('');
   const [assistantReport, setAssistantReport] = useState<AssistantReport>();
+  const [aiReview, setAiReview] = useState<AiArtworkReview>();
+  const [aiReviewLoading, setAiReviewLoading] = useState(false);
 
   const addToCart = useCart((state) => state.add);
   const mockups = useMemo(() => activeMockups(product, colorKey), [product, colorKey]);
@@ -440,6 +451,40 @@ export function DesignStudio({ product }: { product: Product }) {
     }
   }
 
+  async function requestAiReview() {
+    const canvas = canvasRef.current;
+    if (!canvas || !mockup || !printArea) return;
+    setAiReviewLoading(true);
+    setAiReview(undefined);
+    setStatus('AI is reviewing the current design...');
+    const imageDataUrl = (await generatePreview())
+      ?? canvas.toDataURL({ format: 'png', multiplier: 1 });
+    const active = canvas.getActiveObject();
+    const response = await fetch('/api/ai/artwork-review', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        imageDataUrl,
+        productName: product.name,
+        productCategory: product.category,
+        productColor: product.variants.find((variant) => variant.colorKey === colorKey)?.colorName ?? colorKey,
+        mockupView: mockup.view,
+        printAreaLabel: printArea.label,
+        outsidePrintArea: outsideArea,
+        selectedLayerType: active instanceof FabricImage ? 'image' : active instanceof Textbox ? 'text' : 'other',
+      }),
+    });
+    const body = await response.json();
+    setAiReviewLoading(false);
+    if (!response.ok) {
+      setStatus(body.error ?? 'AI artwork review failed');
+      analyzeSelected();
+      return;
+    }
+    setAiReview(body);
+    setStatus('AI artwork review complete');
+  }
+
   function designData() {
     if (canvasRef.current && designKey) savedDesignsRef.current[designKey] = canvasRef.current.toJSON();
     return {
@@ -698,6 +743,15 @@ export function DesignStudio({ product }: { product: Product }) {
           <button type="button" className="btn-secondary mt-3 flex w-full items-center justify-center gap-2" onClick={analyzeSelected}>
             <ScanSearch size={16} /> Analyze artwork
           </button>
+          <button
+            type="button"
+            className="mt-2 flex w-full items-center justify-center gap-2 bg-teal-700 px-4 py-3 text-sm font-bold text-white hover:bg-teal-800 disabled:opacity-60"
+            onClick={() => void requestAiReview()}
+            disabled={aiReviewLoading}
+          >
+            {aiReviewLoading ? <LoaderCircle className="animate-spin" size={16} /> : <BrainCircuit size={16} />}
+            {aiReviewLoading ? 'Reviewing design...' : 'AI visual review'}
+          </button>
           <div className="mt-2 grid grid-cols-2 gap-2">
             <button type="button" className="btn-secondary flex items-center justify-center gap-2 !px-2" onClick={smartFitSelected} disabled={!selected}>
               <WandSparkles size={15} /> Smart fit
@@ -720,6 +774,33 @@ export function DesignStudio({ product }: { product: Product }) {
               <ul className="mt-2 space-y-1 text-xs text-slate-600">
                 {assistantReport.findings.map((finding) => <li key={finding}>{finding}</li>)}
               </ul>
+            </div>
+          )}
+          {aiReview && (
+            <div className="mt-3 border border-teal-300 bg-teal-50 p-3">
+              <div className="flex items-center justify-between gap-3">
+                <strong className="text-sm">AI: {aiReview.productionRecommendation}</strong>
+                <span className={`text-sm font-black ${aiReview.score >= 85 ? 'text-teal-700' : aiReview.score >= 60 ? 'text-amber-700' : 'text-red-700'}`}>
+                  {aiReview.score}/100
+                </span>
+              </div>
+              <p className="mt-2 text-xs text-slate-700">{aiReview.summary}</p>
+              {aiReview.printRisks.length > 0 && (
+                <>
+                  <h4 className="mt-3 text-xs font-black uppercase text-slate-700">Print risks</h4>
+                  <ul className="mt-1 space-y-1 text-xs text-slate-600">
+                    {aiReview.printRisks.map((risk) => <li key={risk}>{risk}</li>)}
+                  </ul>
+                </>
+              )}
+              {aiReview.designSuggestions.length > 0 && (
+                <>
+                  <h4 className="mt-3 text-xs font-black uppercase text-slate-700">Suggestions</h4>
+                  <ul className="mt-1 space-y-1 text-xs text-slate-600">
+                    {aiReview.designSuggestions.map((suggestion) => <li key={suggestion}>{suggestion}</li>)}
+                  </ul>
+                </>
+              )}
             </div>
           )}
         </div>
