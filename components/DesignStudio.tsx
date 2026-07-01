@@ -9,8 +9,11 @@ import {
   ImagePlus,
   Layers3,
   Save,
+  ScanSearch,
+  Sparkles,
   Trash2,
   Type,
+  WandSparkles,
 } from 'lucide-react';
 import { Canvas, FabricImage, FabricObject, Rect, Textbox } from 'fabric';
 import type { PrintArea, Product, ProductMockup } from '@/lib/types';
@@ -19,6 +22,11 @@ import { getUnitPrice } from '@/lib/pricing';
 
 type SerializedCanvas = ReturnType<Canvas['toJSON']>;
 type LayerItem = { object: FabricObject; name: string };
+type AssistantReport = {
+  score: number;
+  title: string;
+  findings: string[];
+};
 
 const CANVAS_SIZE = 600;
 const LOCATION_SURCHARGE = 2.5;
@@ -70,6 +78,7 @@ export function DesignStudio({ product }: { product: Product }) {
   const [objectCounts, setObjectCounts] = useState<Record<string, number>>({});
   const [preview, setPreview] = useState<string>();
   const [status, setStatus] = useState('');
+  const [assistantReport, setAssistantReport] = useState<AssistantReport>();
 
   const addToCart = useCart((state) => state.add);
   const mockups = useMemo(() => activeMockups(product, colorKey), [product, colorKey]);
@@ -266,6 +275,169 @@ export function DesignStudio({ product }: { product: Product }) {
     active.setCoords();
     canvas.requestRenderAll();
     syncCanvas();
+  }
+
+  function analyzeSelected() {
+    const active = canvasRef.current?.getActiveObject();
+    if (!active || !printArea) {
+      setAssistantReport({
+        score: 0,
+        title: 'Select an artwork or text layer',
+        findings: ['The assistant analyzes one selected layer at a time.'],
+      });
+      return;
+    }
+    const area = canvasArea(printArea);
+    const bounds = active.getBoundingRect();
+    const findings: string[] = [];
+    let score = 100;
+    const extendsOutside =
+      bounds.left < area.left ||
+      bounds.top < area.top ||
+      bounds.left + bounds.width > area.left + area.width ||
+      bounds.top + bounds.height > area.top + area.height;
+    if (extendsOutside) {
+      score -= 35;
+      findings.push(`Artwork extends outside ${printArea.label} and will be clipped.`);
+    } else {
+      findings.push(`Placement is contained inside ${printArea.label}.`);
+    }
+    const coverage = (bounds.width * bounds.height) / (area.width * area.height);
+    if (coverage < 0.08) {
+      score -= 15;
+      findings.push('Artwork may appear too small at production size.');
+    } else if (coverage > 0.9) {
+      score -= 10;
+      findings.push('Artwork is close to the print-zone edge; allow more production margin.');
+    } else {
+      findings.push('Artwork scale has a practical production margin.');
+    }
+    if (active instanceof FabricImage) {
+      const sourceWidth = active.width || 0;
+      const displayedWidth = Math.max(active.getScaledWidth(), 1);
+      const resolutionRatio = sourceWidth / displayedWidth;
+      if (resolutionRatio < 1) {
+        score -= 30;
+        findings.push('Source artwork is being enlarged and may print soft or pixelated.');
+      } else if (resolutionRatio < 2) {
+        score -= 10;
+        findings.push('Resolution is usable, but a larger source file would improve print quality.');
+      } else {
+        findings.push('Source resolution is strong for the current scale.');
+      }
+    } else if (active instanceof Textbox) {
+      findings.push('Text remains editable and resolution-independent.');
+      if (active.fontSize * (active.scaleY || 1) < 14) {
+        score -= 15;
+        findings.push('Text may be too small for reliable decoration.');
+      }
+    }
+    const finalScore = Math.max(0, score);
+    setAssistantReport({
+      score: finalScore,
+      title: finalScore >= 85 ? 'Production ready' : finalScore >= 60 ? 'Review recommended' : 'Artwork needs attention',
+      findings,
+    });
+  }
+
+  function smartFitSelected() {
+    const canvas = canvasRef.current;
+    const active = canvas?.getActiveObject();
+    if (!canvas || !active || !printArea) return;
+    const area = canvasArea(printArea);
+    const widthRatio = (area.width * 0.82) / Math.max(active.getScaledWidth(), 1);
+    const heightRatio = (area.height * 0.82) / Math.max(active.getScaledHeight(), 1);
+    const ratio = Math.min(widthRatio, heightRatio);
+    active.set({
+      scaleX: (active.scaleX || 1) * ratio,
+      scaleY: (active.scaleY || 1) * ratio,
+      left: area.left + area.width / 2,
+      top: area.top + area.height / 2,
+      originX: 'center',
+      originY: 'center',
+    });
+    active.setCoords();
+    applyClip(active);
+    canvas.requestRenderAll();
+    syncCanvas();
+    setStatus('Assistant fitted artwork to the printable area');
+    setTimeout(analyzeSelected, 0);
+  }
+
+  function applyContrastColor() {
+    const canvas = canvasRef.current;
+    const active = canvas?.getActiveObject();
+    if (!canvas || !(active instanceof Textbox)) {
+      setStatus('Select a text layer to apply contrast');
+      return;
+    }
+    const hex = product.variants.find((variant) => variant.colorKey === colorKey)?.hexColor ?? '#ffffff';
+    const red = Number.parseInt(hex.slice(1, 3), 16);
+    const green = Number.parseInt(hex.slice(3, 5), 16);
+    const blue = Number.parseInt(hex.slice(5, 7), 16);
+    const luminance = (0.2126 * red + 0.7152 * green + 0.0722 * blue) / 255;
+    const color = luminance > 0.52 ? '#111827' : '#ffffff';
+    active.set('fill', color);
+    setTextColor(color);
+    canvas.requestRenderAll();
+    syncCanvas();
+    setStatus('Assistant selected a high-contrast text color');
+  }
+
+  function removeImageBackground() {
+    const canvas = canvasRef.current;
+    const active = canvas?.getActiveObject();
+    if (!canvas || !(active instanceof FabricImage)) {
+      setStatus('Select an uploaded raster image to remove its background');
+      return;
+    }
+    const source = active.getElement();
+    const width = active.width || source.width;
+    const height = active.height || source.height;
+    if (!width || !height || width * height > 16_000_000) {
+      setStatus('Use an image smaller than 16 megapixels for background cleanup');
+      return;
+    }
+    const output = document.createElement('canvas');
+    output.width = width;
+    output.height = height;
+    const context = output.getContext('2d', { willReadFrequently: true });
+    if (!context) return;
+    try {
+      context.drawImage(source, 0, 0, width, height);
+      const pixels = context.getImageData(0, 0, width, height);
+      const corners = [
+        0,
+        (width - 1) * 4,
+        (height - 1) * width * 4,
+        ((height - 1) * width + width - 1) * 4,
+      ];
+      const background = corners.reduce(
+        (sum, index) => [
+          sum[0] + pixels.data[index],
+          sum[1] + pixels.data[index + 1],
+          sum[2] + pixels.data[index + 2],
+        ],
+        [0, 0, 0],
+      ).map((value) => value / corners.length);
+      for (let index = 0; index < pixels.data.length; index += 4) {
+        const distance = Math.sqrt(
+          (pixels.data[index] - background[0]) ** 2 +
+          (pixels.data[index + 1] - background[1]) ** 2 +
+          (pixels.data[index + 2] - background[2]) ** 2,
+        );
+        if (distance < 52) pixels.data[index + 3] = Math.round((distance / 52) * pixels.data[index + 3]);
+      }
+      context.putImageData(pixels, 0, 0);
+      active.setElement(output, { width, height });
+      applyClip(active);
+      canvas.requestRenderAll();
+      syncCanvas();
+      setStatus('Assistant removed the corner-matched background');
+      setTimeout(analyzeSelected, 0);
+    } catch {
+      setStatus('Background cleanup is unavailable for this image source');
+    }
   }
 
   function designData() {
@@ -516,6 +688,40 @@ export function DesignStudio({ product }: { product: Product }) {
           <button type="button" title="Delete" aria-label="Delete" className="btn-secondary !px-0" onClick={deleteSelected} disabled={!selected}><Trash2 className="mx-auto" size={17} /></button>
           <button type="button" title="Center horizontally" aria-label="Center horizontally" className="btn-secondary !px-0" onClick={() => centerSelected('horizontal')} disabled={!selected}><AlignCenterHorizontal className="mx-auto" size={17} /></button>
           <button type="button" title="Center vertically" aria-label="Center vertically" className="btn-secondary !px-0" onClick={() => centerSelected('vertical')} disabled={!selected}><AlignCenterVertical className="mx-auto" size={17} /></button>
+        </div>
+        <div className="border-t border-slate-200 pt-4">
+          <div className="flex items-center gap-2">
+            <Sparkles size={17} className="text-teal-700" />
+            <h3 className="font-black">AI artwork assistant</h3>
+          </div>
+          <p className="mt-1 text-xs text-slate-500">Private, on-device analysis for the selected layer.</p>
+          <button type="button" className="btn-secondary mt-3 flex w-full items-center justify-center gap-2" onClick={analyzeSelected}>
+            <ScanSearch size={16} /> Analyze artwork
+          </button>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <button type="button" className="btn-secondary flex items-center justify-center gap-2 !px-2" onClick={smartFitSelected} disabled={!selected}>
+              <WandSparkles size={15} /> Smart fit
+            </button>
+            <button type="button" className="btn-secondary !px-2" onClick={applyContrastColor} disabled={!selected}>
+              Auto contrast
+            </button>
+          </div>
+          <button type="button" className="btn-secondary mt-2 w-full" onClick={removeImageBackground} disabled={!selected}>
+            Remove image background
+          </button>
+          {assistantReport && (
+            <div className="mt-3 border border-slate-200 bg-slate-50 p-3">
+              <div className="flex items-center justify-between">
+                <strong className="text-sm">{assistantReport.title}</strong>
+                <span className={`text-sm font-black ${assistantReport.score >= 85 ? 'text-teal-700' : assistantReport.score >= 60 ? 'text-amber-700' : 'text-red-700'}`}>
+                  {assistantReport.score}/100
+                </span>
+              </div>
+              <ul className="mt-2 space-y-1 text-xs text-slate-600">
+                {assistantReport.findings.map((finding) => <li key={finding}>{finding}</li>)}
+              </ul>
+            </div>
+          )}
         </div>
         <div>
           <label className="label">Quantity</label>
