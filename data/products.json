@@ -3,7 +3,6 @@
     "id": "p1",
     "slug": "classic-tee",
     "name": "Classic Cotton Tee",
-    "categoryId": "cat-tshirts",
     "category": "T-Shirts",
     "description": "Soft everyday cotton tee for events, schools, teams, and business campaigns.",
     "variants": [
@@ -153,7 +152,6 @@
     "id": "p2",
     "slug": "performance-polo",
     "name": "Performance Polo",
-    "categoryId": "cat-polos",
     "category": "Polos",
     "description": "Moisture-wicking polo for uniforms, golf outings, and staff apparel.",
     "variants": [
@@ -274,7 +272,6 @@
     "id": "p3",
     "slug": "canvas-tote",
     "name": "Heavy Canvas Tote",
-    "categoryId": "cat-bags",
     "category": "Bags",
     "description": "Durable canvas tote for retail, trade shows, gifts, and corporate giveaways.",
     "variants": [
@@ -378,7 +375,6 @@
     "id": "p4",
     "slug": "embroidered-cap",
     "name": "Embroidered Cap",
-    "categoryId": "cat-hats",
     "category": "Hats",
     "description": "Structured cap with an embroidery-ready front panel and adjustable closure.",
     "variants": [

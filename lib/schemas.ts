@@ -50,7 +50,6 @@ export const productSchema = z.object({
   id: z.string().min(1),
   slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
   name: z.string().trim().min(2).max(120),
-  categoryId: z.string().min(1).optional(),
   category: z.string().trim().min(1).max(80),
   description: z.string().trim().min(1).max(2000),
   variants: z.array(productVariantSchema).min(1),
@@ -64,16 +63,6 @@ export const productSchema = z.object({
   sku: z.string().trim().min(1).max(80),
   active: z.boolean(),
   tags: z.array(z.string().trim().min(1)).max(20),
-});
-
-export const productCategorySchema = z.object({
-  id: z.string().min(1),
-  name: z.string().trim().min(1).max(80),
-  slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
-  description: z.string().trim().max(500),
-  imageUrl: z.string().url().optional(),
-  displayOrder: z.number().int().min(0),
-  active: z.boolean(),
 });
 
 const navigationSchema = z.object({
