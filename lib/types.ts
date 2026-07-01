@@ -65,6 +65,18 @@ export type Product = {
   tags: string[];
 };
 
+export type ProductCollection = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  productIds: string[];
+  displayOrder: number;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type CartItem = {
   id: string;
   productSlug: string;

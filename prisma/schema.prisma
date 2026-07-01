@@ -34,21 +34,45 @@ model MediaAsset {
 }
 
 model Product {
-  id          String           @id @default(cuid())
-  slug        String           @unique
+  id          String              @id @default(cuid())
+  slug        String              @unique
   name        String
   category    String
   description String
-  sku         String           @unique
-  active      Boolean          @default(true)
-  basePrice   Decimal          @db.Decimal(10, 2)
+  sku         String              @unique
+  active      Boolean             @default(true)
+  basePrice   Decimal             @db.Decimal(10, 2)
   sizes       String[]
   tags        String[]
   priceBreaks Json
   variants    ProductVariant[]
   mockups     ProductMockup[]
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  collections CollectionProduct[]
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+}
+
+model ProductCollection {
+  id           String              @id @default(cuid())
+  name         String
+  slug         String              @unique
+  description  String
+  displayOrder Int                 @default(0)
+  active       Boolean             @default(true)
+  products     CollectionProduct[]
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+}
+
+model CollectionProduct {
+  collectionId String
+  productId    String
+  displayOrder Int               @default(0)
+  collection   ProductCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  product      Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([collectionId, productId])
+  @@index([productId])
 }
 
 model ProductVariant {

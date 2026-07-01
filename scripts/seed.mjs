@@ -271,6 +271,7 @@ const site = {
 
 await Promise.all([
   writeFile(path.join(dataDirectory, 'products.json'), JSON.stringify(products, null, 2)),
+  writeFile(path.join(dataDirectory, 'collections.json'), JSON.stringify([], null, 2)),
   writeFile(path.join(dataDirectory, 'media.json'), JSON.stringify(media, null, 2)),
   writeFile(path.join(dataDirectory, 'site.json'), JSON.stringify(site, null, 2)),
 ]);

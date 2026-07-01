@@ -65,6 +65,18 @@ export const productSchema = z.object({
   tags: z.array(z.string().trim().min(1)).max(20),
 });
 
+export const productCollectionSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().trim().min(1).max(120),
+  slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  description: z.string().trim().max(1000),
+  productIds: z.array(z.string().min(1)).max(500),
+  displayOrder: z.number().int().min(0),
+  active: z.boolean(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+
 const navigationSchema = z.object({
   id: z.string().min(1),
   label: z.string().trim().min(1).max(80),
