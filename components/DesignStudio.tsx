@@ -12,6 +12,7 @@ import {
   LoaderCircle,
   Save,
   ScanSearch,
+  Shapes,
   Sparkles,
   Trash2,
   Type,
@@ -35,6 +36,10 @@ type AiArtworkReview = {
   printRisks: string[];
   designSuggestions: string[];
   productionRecommendation: 'READY' | 'REVIEW' | 'REVISE';
+};
+type GeneratedLogo = {
+  imageDataUrl: string;
+  revisedPrompt: string;
 };
 
 const CANVAS_SIZE = 600;
@@ -90,6 +95,12 @@ export function DesignStudio({ product }: { product: Product }) {
   const [assistantReport, setAssistantReport] = useState<AssistantReport>();
   const [aiReview, setAiReview] = useState<AiArtworkReview>();
   const [aiReviewLoading, setAiReviewLoading] = useState(false);
+  const [logoPrompt, setLogoPrompt] = useState('');
+  const [logoBrandName, setLogoBrandName] = useState('');
+  const [logoStyle, setLogoStyle] = useState('BOLD');
+  const [logoColors, setLogoColors] = useState(['#0f766e', '#111827']);
+  const [logoLoading, setLogoLoading] = useState(false);
+  const [generatedLogo, setGeneratedLogo] = useState<GeneratedLogo>();
 
   const addToCart = useCart((state) => state.add);
   const mockups = useMemo(() => activeMockups(product, colorKey), [product, colorKey]);
@@ -485,6 +496,57 @@ export function DesignStudio({ product }: { product: Product }) {
     setStatus('AI artwork review complete');
   }
 
+  async function generateAiLogo() {
+    if (logoPrompt.trim().length < 8) {
+      setStatus('Describe the logo in at least 8 characters');
+      return;
+    }
+    setLogoLoading(true);
+    setGeneratedLogo(undefined);
+    setStatus('AI is creating a transparent logo...');
+    const response = await fetch('/api/ai/logo-creator', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prompt: logoPrompt,
+        brandName: logoBrandName || undefined,
+        style: logoStyle,
+        colors: logoColors,
+      }),
+    });
+    const body = await response.json();
+    setLogoLoading(false);
+    if (!response.ok) {
+      setStatus(body.error ?? 'AI logo generation failed');
+      return;
+    }
+    setGeneratedLogo(body);
+    setStatus('AI logo ready to add to the design');
+  }
+
+  async function addGeneratedLogo() {
+    const canvas = canvasRef.current;
+    if (!canvas || !printArea || !generatedLogo) return;
+    const image = await FabricImage.fromURL(generatedLogo.imageDataUrl);
+    const area = canvasArea(printArea);
+    image.scale(Math.min(
+      (area.width * 0.75) / (image.width || 1),
+      (area.height * 0.75) / (image.height || 1),
+    ));
+    image.set({
+      left: area.left + area.width / 2,
+      top: area.top + area.height / 2,
+      originX: 'center',
+      originY: 'center',
+    });
+    applyClip(image);
+    canvas.add(image);
+    canvas.setActiveObject(image);
+    canvas.requestRenderAll();
+    syncCanvas();
+    setStatus('AI logo added to the printable area');
+  }
+
   function designData() {
     if (canvasRef.current && designKey) savedDesignsRef.current[designKey] = canvasRef.current.toJSON();
     return {
@@ -740,6 +802,76 @@ export function DesignStudio({ product }: { product: Product }) {
             <h3 className="font-black">AI artwork assistant</h3>
           </div>
           <p className="mt-1 text-xs text-slate-500">Private, on-device analysis for the selected layer.</p>
+          <details className="mt-3 border border-teal-300 bg-teal-50">
+            <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-3 text-sm font-black text-teal-900">
+              <Shapes size={17} /> AI logo creator
+            </summary>
+            <div className="space-y-3 border-t border-teal-200 p-3">
+              <label className="block text-xs font-bold text-slate-700">
+                Logo idea
+                <textarea
+                  className="input mt-1 min-h-20 !rounded-none"
+                  placeholder="Example: A bold mountain peak with a rising sun"
+                  value={logoPrompt}
+                  onChange={(event) => setLogoPrompt(event.target.value)}
+                  maxLength={800}
+                />
+              </label>
+              <label className="block text-xs font-bold text-slate-700">
+                Brand text (optional)
+                <input
+                  className="input mt-1 !rounded-none"
+                  placeholder="Exact text to include"
+                  value={logoBrandName}
+                  onChange={(event) => setLogoBrandName(event.target.value)}
+                  maxLength={100}
+                />
+              </label>
+              <label className="block text-xs font-bold text-slate-700">
+                Style
+                <select className="input mt-1 !rounded-none" value={logoStyle} onChange={(event) => setLogoStyle(event.target.value)}>
+                  <option value="MINIMAL">Minimal</option>
+                  <option value="BOLD">Bold</option>
+                  <option value="VINTAGE">Vintage</option>
+                  <option value="PLAYFUL">Playful</option>
+                  <option value="SPORT">Sport</option>
+                  <option value="CORPORATE">Corporate</option>
+                </select>
+              </label>
+              <div>
+                <span className="text-xs font-bold text-slate-700">Colors</span>
+                <div className="mt-1 flex gap-2">
+                  {logoColors.map((color, index) => (
+                    <input
+                      key={index}
+                      aria-label={`Logo color ${index + 1}`}
+                      type="color"
+                      value={color}
+                      onChange={(event) => setLogoColors(logoColors.map((current, colorIndex) => colorIndex === index ? event.target.value : current))}
+                      className="h-10 w-12 border border-slate-300 bg-white p-1"
+                    />
+                  ))}
+                </div>
+              </div>
+              <button
+                type="button"
+                className="flex w-full items-center justify-center gap-2 bg-teal-800 px-4 py-3 text-sm font-bold text-white disabled:opacity-60"
+                onClick={() => void generateAiLogo()}
+                disabled={logoLoading}
+              >
+                {logoLoading ? <LoaderCircle className="animate-spin" size={16} /> : <Sparkles size={16} />}
+                {logoLoading ? 'Creating logo...' : generatedLogo ? 'Generate another' : 'Create logo'}
+              </button>
+              {generatedLogo && (
+                <div>
+                  <img src={generatedLogo.imageDataUrl} alt="AI-generated logo preview" className="aspect-square w-full border border-slate-300 bg-[linear-gradient(45deg,#e2e8f0_25%,transparent_25%),linear-gradient(-45deg,#e2e8f0_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#e2e8f0_75%),linear-gradient(-45deg,transparent_75%,#e2e8f0_75%)] bg-[length:20px_20px] object-contain" />
+                  <button type="button" className="btn-primary mt-2 w-full" onClick={() => void addGeneratedLogo()}>
+                    Add logo to design
+                  </button>
+                </div>
+              )}
+            </div>
+          </details>
           <button type="button" className="btn-secondary mt-3 flex w-full items-center justify-center gap-2" onClick={analyzeSelected}>
             <ScanSearch size={16} /> Analyze artwork
           </button>
