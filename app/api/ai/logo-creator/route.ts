@@ -58,25 +58,20 @@ export async function POST(request: Request) {
   ].join('\n');
 
   try {
-    const response = await fetch('https://api.openai.com/v1/responses', {
+    const response = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: process.env.OPENAI_IMAGE_ORCHESTRATOR_MODEL || 'gpt-5',
-        store: false,
-        input: generationPrompt,
-        tools: [{
-          type: 'image_generation',
-          action: 'generate',
-          background: 'transparent',
-          quality: 'medium',
-          size: '1024x1024',
-          output_format: 'png',
-        }],
-        tool_choice: { type: 'image_generation' },
+        model: process.env.OPENAI_IMAGE_MODEL || 'gpt-image-1.5',
+        prompt: generationPrompt,
+        background: 'transparent',
+        quality: 'medium',
+        size: '1024x1024',
+        output_format: 'png',
+        n: 1,
       }),
     });
     const body = await response.json();
@@ -86,14 +81,12 @@ export async function POST(request: Request) {
         { status: response.status },
       );
     }
-    const result = body.output?.find(
-      (item: { type?: string; result?: string }) => item.type === 'image_generation_call',
-    );
-    if (!result?.result) {
+    const result = body.data?.[0];
+    if (!result?.b64_json) {
       return NextResponse.json({ error: 'AI logo generation returned no image' }, { status: 502 });
     }
     return NextResponse.json({
-      imageDataUrl: `data:image/png;base64,${result.result}`,
+      imageDataUrl: `data:image/png;base64,${result.b64_json}`,
       revisedPrompt: result.revised_prompt ?? generationPrompt,
     });
   } catch {
