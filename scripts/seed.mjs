@@ -12,6 +12,13 @@ const imageUrls = {
   hero: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=1800&q=85',
 };
 
+const categories = [
+  { id: 'cat-tshirts', name: 'T-Shirts', slug: 't-shirts', description: 'Custom tees for teams, events, and organizations.', imageUrl: imageUrls.tee, displayOrder: 0, active: true },
+  { id: 'cat-polos', name: 'Polos', slug: 'polos', description: 'Performance and uniform polos.', imageUrl: imageUrls.polo, displayOrder: 1, active: true },
+  { id: 'cat-bags', name: 'Bags', slug: 'bags', description: 'Reusable totes and branded bags.', imageUrl: imageUrls.tote, displayOrder: 2, active: true },
+  { id: 'cat-hats', name: 'Hats', slug: 'hats', description: 'Caps and embroidered headwear.', imageUrl: imageUrls.cap, displayOrder: 3, active: true },
+];
+
 function printArea(mockupId, suffix, label, x, y, width, height) {
   return {
     id: `${mockupId}-${suffix}`,
@@ -60,6 +67,7 @@ const products = [
     id: 'p1',
     slug: 'classic-tee',
     name: 'Classic Cotton Tee',
+    categoryId: 'cat-tshirts',
     category: 'T-Shirts',
     description: 'Soft everyday cotton tee for events, schools, teams, and business campaigns.',
     variants: variants('p1', [['WHITE', 'White', '#ffffff'], ['BLACK', 'Black', '#111827']]),
@@ -86,6 +94,7 @@ const products = [
     id: 'p2',
     slug: 'performance-polo',
     name: 'Performance Polo',
+    categoryId: 'cat-polos',
     category: 'Polos',
     description: 'Moisture-wicking polo for uniforms, golf outings, and staff apparel.',
     variants: variants('p2', [['NAVY', 'Navy', '#172554'], ['WHITE', 'White', '#ffffff']]),
@@ -109,6 +118,7 @@ const products = [
     id: 'p3',
     slug: 'canvas-tote',
     name: 'Heavy Canvas Tote',
+    categoryId: 'cat-bags',
     category: 'Bags',
     description: 'Durable canvas tote for retail, trade shows, gifts, and corporate giveaways.',
     variants: variants('p3', [['NATURAL', 'Natural', '#e7d7bd'], ['BLACK', 'Black', '#111827']]),
@@ -131,6 +141,7 @@ const products = [
     id: 'p4',
     slug: 'embroidered-cap',
     name: 'Embroidered Cap',
+    categoryId: 'cat-hats',
     category: 'Hats',
     description: 'Structured cap with an embroidery-ready front panel and adjustable closure.',
     variants: variants('p4', [['BLACK', 'Black', '#111827'], ['KHAKI', 'Khaki', '#c3ae86']]),
@@ -271,6 +282,7 @@ const site = {
 
 await Promise.all([
   writeFile(path.join(dataDirectory, 'products.json'), JSON.stringify(products, null, 2)),
+  writeFile(path.join(dataDirectory, 'categories.json'), JSON.stringify(categories, null, 2)),
   writeFile(path.join(dataDirectory, 'media.json'), JSON.stringify(media, null, 2)),
   writeFile(path.join(dataDirectory, 'site.json'), JSON.stringify(site, null, 2)),
 ]);

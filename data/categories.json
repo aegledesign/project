@@ -1,0 +1,36 @@
+[
+  {
+    "id": "cat-tshirts",
+    "name": "T-Shirts",
+    "slug": "t-shirts",
+    "description": "Custom tees for teams, events, and organizations.",
+    "imageUrl": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1200&q=85",
+    "displayOrder": 0,
+    "active": true
+  },
+  {
+    "id": "cat-polos",
+    "name": "Polos",
+    "slug": "polos",
+    "description": "Performance and uniform polos.",
+    "displayOrder": 1,
+    "active": true
+  },
+  {
+    "id": "cat-bags",
+    "name": "Bags",
+    "slug": "bags",
+    "description": "Reusable totes and branded bags.",
+    "displayOrder": 2,
+    "active": true
+  },
+  {
+    "id": "cat-hats",
+    "name": "Hats",
+    "slug": "hats",
+    "description": "Caps and embroidered headwear.",
+    "imageUrl": "https://images.unsplash.com/photo-1521369909029-2afed882baee?auto=format&fit=crop&w=1200&q=85",
+    "displayOrder": 3,
+    "active": true
+  }
+]
