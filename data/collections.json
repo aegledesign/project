@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "id": "8c0a058c-2c7a-44ac-88a4-90a0f56348e0",
+    "name": "Shirts",
+    "slug": "shirts",
+    "description": "",
+    "published": false,
+    "publishedAt": null,
+    "productIds": [
+      "p1",
+      "p2"
+    ],
+    "displayOrder": 0,
+    "active": true,
+    "createdAt": "2026-07-01T14:36:58.476Z",
+    "updatedAt": "2026-07-01T14:36:58.476Z"
+  }
+]

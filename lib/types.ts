@@ -70,9 +70,12 @@ export type ProductCollection = {
   name: string;
   slug: string;
   description: string;
+  imageUrl?: string;
   productIds: string[];
   displayOrder: number;
   active: boolean;
+  published: boolean;
+  publishedAt: string | null;
   createdAt: string;
   updatedAt: string;
 };

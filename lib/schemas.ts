@@ -70,9 +70,12 @@ export const productCollectionSchema = z.object({
   name: z.string().trim().min(1).max(120),
   slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
   description: z.string().trim().max(1000),
+  imageUrl: z.string().url().optional(),
   productIds: z.array(z.string().min(1)).max(500),
   displayOrder: z.number().int().min(0),
   active: z.boolean(),
+  published: z.boolean(),
+  publishedAt: z.string().datetime().nullable(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });

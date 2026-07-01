@@ -21,6 +21,8 @@ export async function PUT(request: Request, { params }: Context) {
     ...body,
     id,
     productIds: [...new Set(body.productIds ?? [])],
+    published: Boolean(body.published),
+    publishedAt: body.published ? existing.publishedAt ?? new Date().toISOString() : null,
     createdAt: existing.createdAt,
     updatedAt: new Date().toISOString(),
   });

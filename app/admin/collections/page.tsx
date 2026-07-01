@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Boxes, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Boxes, EyeOff, Globe2, Pencil, Plus, Trash2 } from 'lucide-react';
 import type { Product, ProductCollection } from '@/lib/types';
 
 function newCollection(order: number): ProductCollection {
@@ -11,9 +11,12 @@ function newCollection(order: number): ProductCollection {
     name: '',
     slug: '',
     description: '',
+    imageUrl: undefined,
     productIds: [],
     displayOrder: order,
     active: true,
+    published: false,
+    publishedAt: null,
     createdAt: now,
     updatedAt: now,
   };
@@ -83,6 +86,23 @@ export default function AdminCollections() {
     await load();
   }
 
+  async function setPublished(collection: ProductCollection, published: boolean) {
+    setError('');
+    setMessage('');
+    const response = await fetch(`/api/admin/collections/${collection.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...collection, published }),
+    });
+    const body = await response.json();
+    if (!response.ok) {
+      setError(body.error ?? 'Unable to update publication status');
+      return;
+    }
+    setMessage(published ? 'Collection published to storefront' : 'Collection removed from storefront');
+    await load();
+  }
+
   return (
     <main className="mx-auto max-w-7xl px-6 py-12">
       <div className="flex items-end justify-between gap-4">
@@ -112,13 +132,24 @@ export default function AdminCollections() {
                   <h2 className="text-xl font-black">{collection.name}</h2>
                   <p className="text-xs font-semibold text-slate-500">/{collection.slug} · Order {collection.displayOrder}</p>
                 </div>
-                <span className={`text-xs font-bold ${collection.active ? 'text-teal-700' : 'text-slate-400'}`}>
-                  {collection.active ? 'Active' : 'Inactive'}
-                </span>
+                <div className="text-right text-xs font-bold">
+                  <span className={collection.active ? 'text-teal-700' : 'text-slate-400'}>{collection.active ? 'Active' : 'Inactive'}</span>
+                  <span className={`mt-1 block ${collection.published ? 'text-blue-700' : 'text-amber-700'}`}>
+                    {collection.published ? 'Published' : 'Draft'}
+                  </span>
+                </div>
               </div>
               <p className="mt-3 text-sm text-slate-600">{collection.description || 'No internal description'}</p>
               <p className="mt-4 text-sm font-bold">{collection.productIds.length} assigned product{collection.productIds.length === 1 ? '' : 's'}</p>
+              {collection.publishedAt && <p className="mt-1 text-xs text-slate-500">Published {new Date(collection.publishedAt).toLocaleString()}</p>}
               <div className="mt-4 flex gap-2">
+                <button
+                  className={`flex items-center gap-2 px-3 py-2 text-sm font-bold text-white ${collection.published ? 'bg-amber-700' : 'bg-blue-700'}`}
+                  onClick={() => void setPublished(collection, !collection.published)}
+                >
+                  {collection.published ? <EyeOff size={15} /> : <Globe2 size={15} />}
+                  {collection.published ? 'Unpublish' : 'Publish'}
+                </button>
                 <button className="btn-secondary flex items-center gap-2 !px-3 !py-2" onClick={() => setDraft(collection)}>
                   <Pencil size={15} /> Edit
                 </button>
@@ -148,12 +179,19 @@ export default function AdminCollections() {
               <label className="label sm:col-span-2">Internal description
                 <textarea className="input mt-1 min-h-24" value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} />
               </label>
+              <label className="label sm:col-span-2">Storefront image URL
+                <input className="input mt-1" value={draft.imageUrl ?? ''} onChange={(event) => setDraft({ ...draft, imageUrl: event.target.value || undefined })} />
+              </label>
               <label className="label">Display order
                 <input className="input mt-1" type="number" min="0" value={draft.displayOrder} onChange={(event) => setDraft({ ...draft, displayOrder: Number(event.target.value) })} />
               </label>
               <label className="flex items-center gap-2 self-end pb-3 text-sm font-semibold">
                 <input type="checkbox" checked={draft.active} onChange={(event) => setDraft({ ...draft, active: event.target.checked })} />
                 Active internally
+              </label>
+              <label className="flex items-center gap-2 text-sm font-semibold sm:col-span-2">
+                <input type="checkbox" checked={draft.published} onChange={(event) => setDraft({ ...draft, published: event.target.checked })} />
+                Publish this revision to the storefront when saved
               </label>
             </div>
             <div className="mt-6 border-t border-slate-200 pt-5">

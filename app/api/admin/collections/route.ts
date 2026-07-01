@@ -20,6 +20,8 @@ export async function POST(request: Request) {
     ...body,
     id: body.id || crypto.randomUUID(),
     productIds: [...new Set(body.productIds ?? [])],
+    published: Boolean(body.published),
+    publishedAt: body.published ? now : null,
     createdAt: now,
     updatedAt: now,
   });
