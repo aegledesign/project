@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
+import Link from 'next/link';
+import { PackagePlus, Pencil, Plus, Trash2 } from 'lucide-react';
 import type { ProductCategory } from '@/lib/types';
 
 function emptyCategory(order: number): ProductCategory {
@@ -104,6 +105,12 @@ export default function AdminCategories() {
                 </div>
                 <p className="mt-2 text-sm text-slate-600">{category.description}</p>
                 <div className="mt-4 flex gap-2">
+                  <Link
+                    className="btn-primary flex items-center gap-2 !px-3 !py-2"
+                    href={`/admin/products?new=1&categoryId=${encodeURIComponent(category.id)}`}
+                  >
+                    <PackagePlus size={15} /> Add product
+                  </Link>
                   <button className="btn-secondary flex items-center gap-2 !px-3 !py-2" onClick={() => setDraft(category)}><Pencil size={15} /> Edit</button>
                   <button className="btn-secondary flex items-center gap-2 !px-3 !py-2 !text-red-700" onClick={() => void remove(category)}><Trash2 size={15} /> Delete</button>
                 </div>

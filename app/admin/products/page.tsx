@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ImageIcon, Pencil, Trash2, Upload } from 'lucide-react';
 import { getDefaultMockup } from '@/lib/productMedia';
@@ -39,6 +39,7 @@ export default function AdminProducts() {
   const [edit, setEdit] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const initializedFromQuery = useRef(false);
 
   async function load() {
     setLoading(true);
@@ -48,8 +49,19 @@ export default function AdminProducts() {
         fetch('/api/admin/categories'),
       ]);
       if (!productsResponse.ok || !categoriesResponse.ok) throw new Error('Unable to load products');
-      setProducts(await productsResponse.json());
-      setCategories(await categoriesResponse.json());
+      const nextProducts: Product[] = await productsResponse.json();
+      const nextCategories: ProductCategory[] = await categoriesResponse.json();
+      setProducts(nextProducts);
+      setCategories(nextCategories);
+      if (!initializedFromQuery.current) {
+        initializedFromQuery.current = true;
+        const query = new URLSearchParams(window.location.search);
+        if (query.get('new') === '1') {
+          const category = nextCategories.find((item) => item.id === query.get('categoryId'))
+            ?? nextCategories.find((item) => item.active);
+          setEdit(blankProduct(category));
+        }
+      }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Unable to load products');
     } finally {
