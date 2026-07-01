@@ -37,6 +37,7 @@ model Product {
   id          String           @id @default(cuid())
   slug        String           @unique
   name        String
+  categoryId  String?
   category    String
   description String
   sku         String           @unique
@@ -47,8 +48,22 @@ model Product {
   priceBreaks Json
   variants    ProductVariant[]
   mockups     ProductMockup[]
+  categoryRef ProductCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
+}
+
+model ProductCategory {
+  id           String    @id @default(cuid())
+  name         String
+  slug         String    @unique
+  description  String
+  imageUrl     String?
+  displayOrder Int       @default(0)
+  active       Boolean   @default(true)
+  products     Product[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
 
 model ProductVariant {

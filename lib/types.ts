@@ -49,10 +49,21 @@ export type ProductVariant = {
   active: boolean;
 };
 
+export type ProductCategory = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  imageUrl?: string;
+  displayOrder: number;
+  active: boolean;
+};
+
 export type Product = {
   id: string;
   slug: string;
   name: string;
+  categoryId?: string;
   category: string;
   description: string;
   variants: ProductVariant[];

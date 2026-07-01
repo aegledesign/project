@@ -4,15 +4,16 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ImageIcon, Pencil, Trash2, Upload } from 'lucide-react';
 import { getDefaultMockup } from '@/lib/productMedia';
-import type { Product } from '@/lib/types';
+import type { Product, ProductCategory } from '@/lib/types';
 
-function blankProduct(): Product {
+function blankProduct(category?: ProductCategory): Product {
   const id = crypto.randomUUID();
   return {
     id,
     slug: '',
     name: '',
-    category: 'T-Shirts',
+    categoryId: category?.id,
+    category: category?.name ?? 'Uncategorized',
     description: '',
     variants: [{
       id: crypto.randomUUID(),
@@ -34,6 +35,7 @@ function blankProduct(): Product {
 
 export default function AdminProducts() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [edit, setEdit] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -41,9 +43,13 @@ export default function AdminProducts() {
   async function load() {
     setLoading(true);
     try {
-      const response = await fetch('/api/products');
-      if (!response.ok) throw new Error('Unable to load products');
-      setProducts(await response.json());
+      const [productsResponse, categoriesResponse] = await Promise.all([
+        fetch('/api/products'),
+        fetch('/api/admin/categories'),
+      ]);
+      if (!productsResponse.ok || !categoriesResponse.ok) throw new Error('Unable to load products');
+      setProducts(await productsResponse.json());
+      setCategories(await categoriesResponse.json());
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Unable to load products');
     } finally {
@@ -56,8 +62,10 @@ export default function AdminProducts() {
   async function save() {
     if (!edit) return;
     setError('');
+    const selectedCategory = categories.find((category) => category.id === edit.categoryId);
     const product = {
       ...edit,
+      category: selectedCategory?.name ?? edit.category,
       slug: edit.slug || edit.name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
     };
     const response = await fetch('/api/products', {
@@ -108,7 +116,7 @@ export default function AdminProducts() {
           <h1 className="text-4xl font-black">Products</h1>
           <p className="mt-2 text-slate-600">Product details, variants, mockups, and printable areas.</p>
         </div>
-        <button className="btn-primary" onClick={() => setEdit(blankProduct())}>Add product</button>
+        <button className="btn-primary" onClick={() => setEdit(blankProduct(categories.find((category) => category.active)))}>Add product</button>
       </div>
       {error && <div className="mt-5 border border-red-300 bg-red-50 p-4 text-red-800">{error}</div>}
       {loading ? (
@@ -173,12 +181,26 @@ export default function AdminProducts() {
               <button className="text-sm font-bold" onClick={() => setEdit(null)}>Close</button>
             </div>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              {(['name', 'slug', 'category', 'sku'] as const).map((key) => (
+              {(['name', 'slug', 'sku'] as const).map((key) => (
                 <label key={key} className="label capitalize">
                   {key}
                   <input className="input mt-1" value={edit[key]} onChange={(event) => setEdit({ ...edit, [key]: event.target.value })} />
                 </label>
               ))}
+              <label className="label">
+                Category
+                <select
+                  className="input mt-1"
+                  value={edit.categoryId ?? ''}
+                  onChange={(event) => {
+                    const category = categories.find((item) => item.id === event.target.value);
+                    setEdit({ ...edit, categoryId: category?.id, category: category?.name ?? edit.category });
+                  }}
+                >
+                  <option value="">Select category</option>
+                  {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+                </select>
+              </label>
             </div>
             <label className="label mt-4 block">
               Description
