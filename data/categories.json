@@ -32,13 +32,5 @@
     "imageUrl": "https://images.unsplash.com/photo-1521369909029-2afed882baee?auto=format&fit=crop&w=1200&q=85",
     "displayOrder": 3,
     "active": true
-  },
-  {
-    "id": "68ddd6da-446d-4c4f-9dd5-8ee14cd13a53",
-    "name": "bottles",
-    "slug": "bottles",
-    "description": "",
-    "displayOrder": 4,
-    "active": true
   }
 ]
