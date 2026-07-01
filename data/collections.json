@@ -4,15 +4,15 @@
     "name": "Shirts",
     "slug": "shirts",
     "description": "",
-    "published": false,
-    "publishedAt": null,
     "productIds": [
       "p1",
       "p2"
     ],
     "displayOrder": 0,
     "active": true,
+    "published": true,
+    "publishedAt": "2026-07-01T18:42:23.954Z",
     "createdAt": "2026-07-01T14:36:58.476Z",
-    "updatedAt": "2026-07-01T14:36:58.476Z"
+    "updatedAt": "2026-07-01T18:42:23.954Z"
   }
 ]

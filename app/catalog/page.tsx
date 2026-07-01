@@ -25,7 +25,7 @@ export default async function Catalog() {
       </header>
 
       {published.map(({ collection, products: collectionProducts }) => (
-        <section key={collection.id} className="border-y border-slate-200 bg-white">
+        <section id={`collection-${collection.slug}`} key={collection.id} className="scroll-mt-28 border-y border-slate-200 bg-white">
           <div className="mx-auto max-w-7xl px-6 py-12">
             <div className="flex items-end justify-between gap-6">
               <div>
